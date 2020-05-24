@@ -1,0 +1,155 @@
+# Mathematical expression interpreter
+
+Your task is to:
+1. Write monadic parsing combinators
+2. Define a structure to represent a parsed mathematical expression in Haskell
+3. Write a parser, which parses a string into the structure
+4. Write an interpreter for the structure, which performs the calculation and returns the result.
+
+**NOTE: the parser and interpreter should be independent.**
+
+You will have to handle division by zero errors.
+
+## The basic expression
+
+### Formal Definition
+
+Note that the expressions can be nested arbitrarily deeply.
+
+Also note, that a number can only be an integer.
+
+The `/` operator is integer division truncated towards negative infinity (`div` in Haskell).
+
+```bnf
+<expression> ::= <number> | <operation>
+
+<number> ::= "-" <digits> | <digits>
+
+<digits> ::= <digit> | <digit> <digits>
+<digit> ::= "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
+
+<operation> ::= "(" <spaces> <expression> <spaces> <operator> <spaces> <expression> <spaces> ")"
+
+<operator> ::= "+" | "-" | "*" | "/"
+
+<spaces> ::= "" | " " <spaces>
+```
+
+### Exmaples
+
+These all represent valid expressions:
+
+- `((1 + 2) * 3)`
+- `1`
+- `(((1 + 2) *3) +(1  +  1)   )`
+
+## The proposed approach
+
+The proposed approach is to use the following monad for parsing
+
+```haskell
+type Parser a = StateT String [] a
+```
+
+`StateT String` -- the state contains the String being currently parsed.
+
+`[]` -- the base monad should be a list. This will provide us with the context of trying different combinations of alternatives, and will also provide a failure context (the empty list).
+
+The result of the parser would be a (possible infinity) list of possible parsed values. You should take the first one.
+
+You can provide a different definition of the `Parser` monad, but you can not use a monad, which was intended for parsing.
+
+### Minimal required combinators
+
+This combinator should read and return exactly one character from the input.
+If there are no characters to read from the input, then it should fail.
+
+```haskell
+anyToken :: Parser Char
+```
+
+```haskell
+token :: Char -> Parser ()
+```
+
+```haskell
+tokens :: String -> Parser ()
+```
+
+```haskell
+tokensWhile :: (Char -> Bool) -> Parser String
+```
+
+```haskell
+tokensWhile1 :: (Char -> Bool) -> Parser String
+```
+
+### Simple example
+
+A sample parser might look something like this
+
+```haskell
+number :: Parser Int
+number = do
+  sign <- signParser
+  digits <- digitsParser
+  return (read (sign <> digits))
+```
+
+### Control
+
+The proposed approach of handling control is using the `Alternative` typeclass.
+
+The instance for `[]` already provides the following behavior:
+
+`empty` represents a failure (no values).
+
+`<|>` represents parsing alternative. For example an expression can be either an operation or a number.
+
+## Complex expressions
+
+This is a slightly more complex version of expressions -- it includes conditional expressions
+
+This represents the new parts:
+
+```bnf
+<expression> ::= <number> | <operation> | <conditional>
+
+<conditional> ::= "if " <spaces> <bool_expression> <spaces> " then " <spaces> <expression> <spaces> " else " <spaces> <expression>
+
+<bool_expression> ::= "(" <spaces> <expression> <spaces> <bool_operator> <spaces> <expression> <spaces> ")"
+
+<bool_operator> = "=" | "<" | ">" | "<=" | ">="
+```
+
+### Examples
+
+These all represent valid expressions:
+
+- `if ( 1 = 2 )  then (2 + 4)  else 2`
+- `(((1 + 2) *3) +( if ( 1 = 2 )  then (2 + 4)  else 2  +  1)   )`
+
+## Artifacts
+
+You should export the `calculate` function, which should parse the given string and return the computed result. If any of the steps involved fail (couldn't parse the string or there was a divide by zero error), you should return `Nothing`.
+
+```haskell
+calculate :: String -> Maybe Int
+```
+
+## Libraries you can use
+
+You can use these two libraries:
+- `base`
+- `mtl`
+
+## Grading
+
+| Requirement                                              | Score |
+| -------------------------------------------------------- | ----- |
+| Definition of the structure, representing the expression | 1     |
+| Definition of the minimal monadic parser combinators     | 2     |
+| Definition of the expression parser                      | 2     |
+| Definition of the expression interpreter                 | 2     |
+| All of the above for complex expressions                 | 2     |
+| Proper decomposition of functionality and coding style   | 1     |

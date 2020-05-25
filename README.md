@@ -68,17 +68,26 @@ If there are no characters to read from the input, then it should fail.
 anyToken :: Parser Char
 ```
 
+This combinator should read and return exactly one character from the input.
+If the character does not match the given character, then it should fail.
+
 ```haskell
 token :: Char -> Parser ()
 ```
+
+This combinator should read a string of charracters. If the string does not match the given string then fail.
 
 ```haskell
 tokens :: String -> Parser ()
 ```
 
+This character reads any number of consecutive characters, which stisfy the predicate. So this can never fail.
+
 ```haskell
 tokensWhile :: (Char -> Bool) -> Parser String
 ```
+
+This character reads any number (but at least one) of consecutive characters, which stisfy the predicate. This can only fail if the first character does not satisfy the predicate.
 
 ```haskell
 tokensWhile1 :: (Char -> Bool) -> Parser String

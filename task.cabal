@@ -1,10 +1,10 @@
 cabal-version: 2.2
 
--- This file has been generated from package.yaml by hpack version 0.33.0.
+-- This file has been generated from package.yaml by hpack version 0.37.0.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: b1f4ab7a3e6ea31d3a641f90b944f1c91d42ea2980c970ad21e0210599d7c284
+-- hash: 21ebdd50fab71f48da67f5db53302dd4cca90fbcaca6500978442065c226b2f3
 
 name:           task
 version:        0.1.0.0
@@ -17,10 +17,12 @@ library
       Task
   other-modules:
       Paths_task
+  autogen-modules:
+      Paths_task
   hs-source-dirs:
       src
   build-depends:
-      base >=4.7 && <5
+      base
     , mtl
   default-language: Haskell2010
 
@@ -30,10 +32,13 @@ test-suite task-tests
   other-modules:
       Tests
       Paths_task
+  autogen-modules:
+      Paths_task
   hs-source-dirs:
       test
   build-depends:
-      base >=4.7 && <5
+      base
+    , hspec
     , mtl
     , task
     , tasty
